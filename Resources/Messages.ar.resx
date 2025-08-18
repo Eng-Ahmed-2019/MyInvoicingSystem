@@ -117,22 +117,205 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ArabicLettersOnly" xml:space="preserve">
+    <value>هذا الحقل يجب أن يحتوي على حروف عربية فقط</value>
+  </data>
+  <data name="CompanyDescriptionArabicOnly" xml:space="preserve">
+    <value>الوصف باللغة العربية فقط</value>
+  </data>
+  <data name="CompanyDescriptionEnglishOnly" xml:space="preserve">
+    <value>الوصف يجب ان يكون باللغة العربية</value>
+  </data>
+  <data name="CompanyDescriptionMaxLength" xml:space="preserve">
+    <value>وصف الشركة لا يتجاوز ال 500 حرف</value>
+  </data>
+  <data name="CompanyNameArabicOnly" xml:space="preserve">
+    <value>اسم الشركة باللغة العربية فقط</value>
+  </data>
   <data name="CompanyNameArRequired " xml:space="preserve">
     <value> اسم الشركة مطلوب.</value>
+  </data>
+  <data name="CompanyNameEnglishOnly" xml:space="preserve">
+    <value>اسم الشركة يحتوي علي حروف انجليزية فقط</value>
+  </data>
+  <data name="CompanyNameMaxLength" xml:space="preserve">
+    <value>اسم الشركة لا يتجاوز ال 150 حرف</value>
+  </data>
+  <data name="CompanyNameMinLength" xml:space="preserve">
+    <value>اسم الشركة لا يجب ان يكون اقل من حرفين</value>
   </data>
   <data name="CompanyNameRequired" xml:space="preserve">
     <value> اسم الشركة بالعربية مطلوب.</value>
   </data>
+  <data name="CompanyRequired" xml:space="preserve">
+    <value>الشركة مطلوبة</value>
+  </data>
+  <data name="Company_Required" xml:space="preserve">
+    <value>الشركة مطلوبة</value>
+  </data>
   <data name="CreatedSuccessfully" xml:space="preserve">
     <value> تم الإنشاء بنجاح.</value>
+  </data>
+  <data name="CustomerEmailInvalid" xml:space="preserve">
+    <value>الايميل غير صحيح</value>
+  </data>
+  <data name="CustomerNameArabicRequired" xml:space="preserve">
+    <value>الاسم باللغة العربية مطلوب</value>
+  </data>
+  <data name="CustomerNameEnglishOnly" xml:space="preserve">
+    <value>الاسم بالنجليزية فقط</value>
+  </data>
+  <data name="CustomerNameMaxLength" xml:space="preserve">
+    <value>اقصي اسم 200 حرف</value>
+  </data>
+  <data name="CustomerNameRequired" xml:space="preserve">
+    <value>الاسم مطلوب</value>
+  </data>
+  <data name="CustomerPhoneInvalid" xml:space="preserve">
+    <value>رقم الهاتف غير صحيح</value>
+  </data>
+  <data name="Customer_Required" xml:space="preserve">
+    <value>العميل مطلوب</value>
   </data>
   <data name="DeletedSuccessfully " xml:space="preserve">
     <value>تم الحذف بنجاح.</value>
   </data>
+  <data name="DescArArabicOnly" xml:space="preserve">
+    <value>الوصف باللغة العربية فقط</value>
+  </data>
+  <data name="DescEnglishOnly" xml:space="preserve">
+    <value>الوصف باللغة الانجليزية فقط</value>
+  </data>
+  <data name="Description_TooLong" xml:space="preserve">
+    <value>الوصف لا يتجاوز ال 1000 حرف</value>
+  </data>
+  <data name="EmailRequired" xml:space="preserve">
+    <value>البريد الإلكتروني مطلوب</value>
+  </data>
+  <data name="EnglishLettersOnly" xml:space="preserve">
+    <value>هذا الحقل يجب أن يحتوي على حروف إنجليزية فقط</value>
+  </data>
+  <data name="FullNameArMaxLength" xml:space="preserve">
+    <value>الاسم الكامل بالعربية لا يمكن أن يتجاوز 100 حرف.</value>
+  </data>
+  <data name="FullNameArRequired" xml:space="preserve">
+    <value>الاسم الكامل بالعربية مطلوب.</value>
+  </data>
+  <data name="FullNameMaxLength" xml:space="preserve">
+    <value>الاسم الكامل لا يمكن أن يتجاوز 100 حرف</value>
+  </data>
+  <data name="FullNameRequired" xml:space="preserve">
+    <value>الاسم الكامل مطلوب</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>البريد الإلكتروني غير صالح</value>
+  </data>
+  <data name="InvoiceItem_DescriptionAr_Invalid" xml:space="preserve">
+    <value>الوصف باللغة العربية</value>
+  </data>
+  <data name="InvoiceItem_Description_Invalid" xml:space="preserve">
+    <value>الوصف باللغة الانجليزية فقط</value>
+  </data>
+  <data name="InvoiceItem_NameAr_Required" xml:space="preserve">
+    <value>الاسم باللغة العربية مطلوب</value>
+  </data>
+  <data name="InvoiceItem_Name_Invalid" xml:space="preserve">
+    <value>يجب ان يحتوي علي حروف باللغة الانجليزية فقط</value>
+  </data>
+  <data name="InvoiceItem_Name_Required" xml:space="preserve">
+    <value>الاسم مطلوب</value>
+  </data>
+  <data name="InvoiceItem_Quantity_Range" xml:space="preserve">
+    <value>لا تقل الكمية عن واحد</value>
+  </data>
+  <data name="InvoiceItem_UnitPrice_Range" xml:space="preserve">
+    <value>السعر يجب ان يكون اكبر من صفر</value>
+  </data>
+  <data name="InvoiceNumber_Required" xml:space="preserve">
+    <value>رقم الفاتورة مطلوب</value>
+  </data>
+  <data name="NameArArabicOnly" xml:space="preserve">
+    <value>الاسم باللغة العربية فقط</value>
+  </data>
+  <data name="NameArMaxLength" xml:space="preserve">
+    <value>الاسم باللغة العربية لا يتجاوز ال 200 حرف</value>
+  </data>
+  <data name="NameArRequired" xml:space="preserve">
+    <value>العنصر مطلوب باللغة العربية</value>
+  </data>
+  <data name="NameEnglishOnly" xml:space="preserve">
+    <value>الاسم باللغة الانجليزية فقط</value>
+  </data>
+  <data name="NameMaxLength" xml:space="preserve">
+    <value>الاسم لا يتجاوز ال 200 حرف</value>
+  </data>
+  <data name="NameRequired" xml:space="preserve">
+    <value>الاسم مطلوب</value>
+  </data>
   <data name="NotFound" xml:space="preserve">
     <value>غير موجود.</value>
   </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>كلمة المرور مطلوبة</value>
+  </data>
+  <data name="PriceRange" xml:space="preserve">
+    <value>يجب ان يكون السعر اكبر من صفر</value>
+  </data>
+  <data name="RoleRequired" xml:space="preserve">
+    <value>الدور مطلوب</value>
+  </data>
+  <data name="Role_DescriptionAr_MaxLength" xml:space="preserve">
+    <value>الوصف باللغة العربية لا يتجاوز ال 250 حرف</value>
+  </data>
+  <data name="Role_DescriptionAr_OnlyLetters" xml:space="preserve">
+    <value>هذا الحقل يحتوي علي حروف باللغة العربية فقط</value>
+  </data>
+  <data name="Role_DescriptionEn_MaxLength" xml:space="preserve">
+    <value>الوصف بالانجليزية لا يتجاوز ال 150 حرف</value>
+  </data>
+  <data name="Role_DescriptionEn_OnlyLetters" xml:space="preserve">
+    <value>هذا الحقل يجب ان يحتوي علي حروف انجليزية فقط</value>
+  </data>
+  <data name="Role_NameAr_MaxLength" xml:space="preserve">
+    <value>الدور باللغة العربية لا يتجاوز ال 100 حرف</value>
+  </data>
+  <data name="Role_NameAr_OnlyLetters" xml:space="preserve">
+    <value>حروف عربية فقط</value>
+  </data>
+  <data name="Role_NameAr_Required" xml:space="preserve">
+    <value>الاسم باللغة العربية مطلوب</value>
+  </data>
+  <data name="Role_NameEn_MaxLength" xml:space="preserve">
+    <value>الاسم بالانجليزية لا يتجاوز ال 100 حرف</value>
+  </data>
+  <data name="Role_NameEn_OnlyLetters" xml:space="preserve">
+    <value>يجب ان يكون باللغة الانجليزية فقط</value>
+  </data>
+  <data name="Role_NameEn_Required" xml:space="preserve">
+    <value>الاسم باللغة الانجليزية مطلوب</value>
+  </data>
+  <data name="Subtotal_Range" xml:space="preserve">
+    <value>المبلغ الفرعي يجب أن يكون أكبر من أو يساوي صفر</value>
+  </data>
+  <data name="Tax_Range" xml:space="preserve">
+    <value>الضريبة يجب أن تكون أكبر من أو تساوي صفر</value>
+  </data>
+  <data name="TitleAr_Required" xml:space="preserve">
+    <value>العنوان باللغة العربية مطلوب</value>
+  </data>
+  <data name="Title_Required" xml:space="preserve">
+    <value>العنوان مطلوب</value>
+  </data>
+  <data name="Total_Range" xml:space="preserve">
+    <value>الإجمالي يجب أن يكون أكبر من أو يساوي صفر</value>
+  </data>
   <data name="UpdatedSuccessfully" xml:space="preserve">
     <value> تم التحديث بنجاح.</value>
+  </data>
+  <data name="UsernameMaxLength" xml:space="preserve">
+    <value>سم المستخدم لا يمكن أن يتجاوز 50 حرف</value>
+  </data>
+  <data name="UsernameRequired" xml:space="preserve">
+    <value>اسم المستخدم مطلوب</value>
   </data>
 </root>

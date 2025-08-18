@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using InvoicingSystem.Localization;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Resources;
 
 namespace InvoicingSystem.Models
 {
@@ -8,22 +10,42 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "English name is required.")]
-        [MaxLength(100, ErrorMessage = "English name cannot exceed 100 characters.")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [Required(
+            ErrorMessageResourceName = "Role_NameEn_Required",
+            ErrorMessageResourceType = typeof(Messages))]
+        [MaxLength(100,
+            ErrorMessageResourceName = "Role_NameEn_MaxLength",
+            ErrorMessageResourceType = typeof(Messages))]
+        [RegularExpression(@"^[a-zA-Z\s]+$",
+            ErrorMessageResourceName = "Role_NameEn_OnlyLetters",
+            ErrorMessageResourceType = typeof(Messages))]
         public string NameEn { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Arabic name is required.")]
-        [MaxLength(100, ErrorMessage = "Arabic name cannot exceed 100 characters.")]
-        [ArabicLettersOnly]
+        [Required(
+            ErrorMessageResourceName = "Role_NameAr_Required",
+            ErrorMessageResourceType = typeof(Messages))]
+        [MaxLength(100,
+            ErrorMessageResourceName = "Role_NameAr_MaxLength",
+            ErrorMessageResourceType = typeof(Messages))]
+        [ArabicLettersOnly(
+            ErrorMessageResourceName = "Role_NameAr_OnlyLetters",
+            ErrorMessageResourceType = typeof(Messages))]
         public string NameAr { get; set; } = string.Empty;
 
-        [MaxLength(250, ErrorMessage = "Description in English cannot exceed 250 characters.")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [MaxLength(250,
+            ErrorMessageResourceName = "Role_DescriptionEn_MaxLength",
+            ErrorMessageResourceType = typeof(Messages))]
+        [RegularExpression(@"^[a-zA-Z\s]+$",
+            ErrorMessageResourceName = "Role_DescriptionEn_OnlyLetters",
+            ErrorMessageResourceType = typeof(Messages))]
         public string? DescriptionEn { get; set; }
 
-        [MaxLength(250, ErrorMessage = "Description in Arabic cannot exceed 250 characters.")]
-        [ArabicLettersOnly]
+        [MaxLength(250,
+            ErrorMessageResourceName = "Role_DescriptionAr_MaxLength",
+            ErrorMessageResourceType = typeof(Messages))]
+        [ArabicLettersOnly(
+            ErrorMessageResourceName = "Role_DescriptionAr_OnlyLetters",
+            ErrorMessageResourceType = typeof(Messages))]
         public string? DescriptionAr { get; set; }
 
         [Required]

@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using InvoicingSystem.Localization;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Resources;
 
 namespace InvoicingSystem.Models
 {
@@ -8,48 +10,76 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "Invoice number is required.")]
+        [Required(
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "InvoiceNumber_Required"
+        )]
         [StringLength(50)]
         public string InvoiceNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Title is required.")]
+        [Required(
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Title_Required"
+        )]
         [StringLength(200)]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
         public string Title { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Arabic title is required.")]
+        [Required(
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "TitleAr_Required"
+        )]
         [StringLength(200)]
         [ArabicLettersOnly]
         public string TitleAr { get; set; } = string.Empty;
 
-        [StringLength(1000)]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [StringLength(1000,
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Description_TooLong"
+        )]
         public string? Description { get; set; }
 
-        [StringLength(1000)]
+        [StringLength(1000,
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Description_TooLong"
+        )]
         [ArabicLettersOnly]
         public string? DescriptionAr { get; set; }
 
-        [Required]
+        [Required(
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Customer_Required"
+        )]
         public Guid CustomerId { get; set; }
         [ForeignKey(nameof(CustomerId))]
         public Customer? Customer { get; set; }
 
-        [Required]
+        [Required(
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Company_Required"
+        )]
         public Guid CompanyId { get; set; }
         [ForeignKey(nameof(CompanyId))]
         public Company? Company { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        [Range(0, double.MaxValue, ErrorMessage = "Subtotal must be greater than or equal to 0.")]
+        [Range(0, double.MaxValue,
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Subtotal_Range"
+        )]
         public decimal Subtotal { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        [Range(0, double.MaxValue, ErrorMessage = "Tax must be greater than or equal to 0.")]
+        [Range(0, double.MaxValue,
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Tax_Range"
+        )]
         public decimal? Tax { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        [Range(0, double.MaxValue, ErrorMessage = "Total must be greater than or equal to 0.")]
+        [Range(0, double.MaxValue,
+            ErrorMessageResourceType = typeof(Messages),
+            ErrorMessageResourceName = "Total_Range"
+        )]
         public decimal Total { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -1,5 +1,6 @@
 ﻿using InvoicingSystem.Models;
-using Microsoft.EntityFrameworkCore;    
+using InvoicingSystem.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace InvoicingSystem.Data
 {
@@ -51,6 +52,11 @@ namespace InvoicingSystem.Data
                 .WithMany()
                 .HasForeignKey(i => i.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        public void SeedDatabase()
+        {
+            DatabaseSeeder.Seed(this);
         }
     }
 }

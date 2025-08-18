@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using InvoicingSystem.Localization;
+using Microsoft.AspNetCore.Components.Forms;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InvoicingSystem.Models
@@ -18,29 +20,43 @@ namespace InvoicingSystem.Models
         [ForeignKey(nameof(ItemId))]
         public Item? Item { get; set; }
 
-        [Required]
+        [Required(
+            ErrorMessageResourceName = "InvoiceItem_Name_Required",
+            ErrorMessageResourceType = typeof(Messages))]
         [MaxLength(200)]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [RegularExpression(@"^[a-zA-Z\s]+$",
+            ErrorMessageResourceName = "InvoiceItem_Name_Invalid",
+            ErrorMessageResourceType = typeof(Messages))]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
+        [Required(
+            ErrorMessageResourceName = "InvoiceItem_NameAr_Required",
+            ErrorMessageResourceType = typeof(Messages))]
         [MaxLength(200)]
         [ArabicLettersOnly]
         public string NameAr { get; set; } = string.Empty;
 
         [MaxLength(500)]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [RegularExpression(@"^[a-zA-Z\s]+$",
+            ErrorMessageResourceName = "InvoiceItem_Description_Invalid",
+            ErrorMessageResourceType = typeof(Messages))]
         public string? Description { get; set; }
 
         [MaxLength(500)]
-        [ArabicLettersOnly]
+        [ArabicLettersOnly(
+            ErrorMessageResourceName = "InvoiceItem_DescriptionAr_Invalid",
+            ErrorMessageResourceType = typeof(Messages))]
         public string? DescriptionAr { get; set; }
 
-        [Range(1, int.MaxValue)]
+        [Range(1, int.MaxValue,
+            ErrorMessageResourceName = "InvoiceItem_Quantity_Range",
+            ErrorMessageResourceType = typeof(Messages))]
         public int Quantity { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        [Range(0.01, double.MaxValue)]
+        [Range(0.01, double.MaxValue,
+            ErrorMessageResourceName = "InvoiceItem_UnitPrice_Range",
+            ErrorMessageResourceType = typeof(Messages))]
         public decimal UnitPrice { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using InvoicingSystem.Localization;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InvoicingSystem.Models
@@ -8,20 +9,20 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "Customer name is required")]
-        [MaxLength(200)]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameRequired")]
+        [MaxLength(200, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameMaxLength")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameEnglishOnly")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Customer Arabic name is required")]
-        [MaxLength(200)]
+        [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameArabicRequired")]
+        [MaxLength(200, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameMaxLength")]
         [ArabicLettersOnly]
         public string NameAr { get; set; } = string.Empty;
 
-        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [EmailAddress(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerEmailInvalid")]
         public string? Email { get; set; }
 
-        [Phone(ErrorMessage = "Invalid phone number")]
+        [Phone(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerPhoneInvalid")]
         [MaxLength(20)]
         public string? Phone { get; set; }
 

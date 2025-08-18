@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using InvoicingSystem.Middleware;
 using Microsoft.OpenApi.Models;
 using InvoicingSystem.Services;
 using InvoicingSystem.Filter;
-using InvoicingSystem.Models;
 using InvoicingSystem.Data;
 using System.Text;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -147,52 +146,10 @@ app.UseAuthorization();
 app.UseRequestLocalization();
 app.MapControllers();
 
-using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-if (!db.Companies.Any())
+using (var scope = app.Services.CreateScope())
 {
-    var companyId = Guid.NewGuid();
-    var userId = Guid.NewGuid();
-    var roleId = Guid.NewGuid();
-
-    var company = new Company
-    {
-        Id = companyId,
-        Name = "Seeded Company",
-        NameAr = "?????? ??????????",
-        Description = "Created automatically",
-        DescriptionAr = "?? ??????? ????????",
-        CreatedAt = DateTime.UtcNow
-    };
-
-    var role = new Role
-    {
-        Id = roleId,
-        NameEn = "Admin",
-        NameAr = "????",
-        DescriptionEn = "Full access",
-        DescriptionAr = "??????? ?????",
-        CompanyId = companyId,
-        CreatedAt = DateTime.UtcNow
-    };
-
-    var user = new User
-    {
-        Id = userId,
-        Username = "admin",
-        Email = "admin@example.com",
-        PasswordHash = PasswordHasher.HashPassword("123456789"),
-        FullName = "Admin User",
-        FullNameAr = "???????? ??????",
-        CompanyId = companyId,
-        RoleId = roleId,
-        CreatedAt = DateTime.UtcNow
-    };
-
-    db.Companies.Add(company);
-    db.Roles.Add(role);
-    db.Users.Add(user);
-    db.SaveChanges();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.SeedDatabase();
 }
 
 app.Run();

@@ -8,24 +8,24 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "NameRequired")]
-        [MaxLength(150, ErrorMessage = "اسم الشركة (بالإنجليزية) يجب ألا يزيد عن 150 حرف.")]
-        [MinLength(2, ErrorMessage = "اسم الشركة (بالإنجليزية) يجب ألا يقل عن حرفين.")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameRequired")]
+        [MaxLength(150, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameMaxLength")]
+        [MinLength(2, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameMinLength")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameEnglishOnly")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "اسم الشركة (بالعربية) مطلوب.")]
-        [MaxLength(150, ErrorMessage = "اسم الشركة (بالعربية) يجب ألا يزيد عن 150 حرف.")]
-        [MinLength(2, ErrorMessage = "اسم الشركة (بالعربية) يجب ألا يقل عن حرفين.")]
-        [ArabicLettersOnly]
+        [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameRequired")]
+        [MaxLength(150, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameMaxLength")]
+        [MinLength(2, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameMinLength")]
+        [ArabicLettersOnly(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameArabicOnly")]
         public string NameAr { get; set; } = string.Empty;
 
-        [MaxLength(500, ErrorMessage = "الوصف (بالإنجليزية) يجب ألا يزيد عن 500 حرف.")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "This field must contain English letters only.")]
+        [MaxLength(500, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyDescriptionMaxLength")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyDescriptionEnglishOnly")]
         public string? Description { get; set; }
 
-        [MaxLength(500, ErrorMessage = "الوصف (بالعربية) يجب ألا يزيد عن 500 حرف.")]
-        [ArabicLettersOnly]
+        [MaxLength(500, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyDescriptionMaxLength")]
+        [ArabicLettersOnly(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyDescriptionArabicOnly")]
         public string? DescriptionAr { get; set; }
 
         [Required]
