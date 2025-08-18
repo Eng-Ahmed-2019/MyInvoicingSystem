@@ -148,7 +148,7 @@
     <value>Company name is required.</value>
   </data>
   <data name="CompanyRequired" xml:space="preserve">
-    <value>Company is required.</value>
+    <value>This Company is required.</value>
   </data>
   <data name="Company_Required" xml:space="preserve">
     <value>Company is required</value>

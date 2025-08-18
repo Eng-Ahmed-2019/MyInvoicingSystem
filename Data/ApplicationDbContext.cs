@@ -54,6 +54,7 @@ namespace InvoicingSystem.Data
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
+        // Seed Data
         public void SeedDatabase()
         {
             DatabaseSeeder.Seed(this);

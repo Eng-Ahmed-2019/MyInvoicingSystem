@@ -146,6 +146,7 @@ app.UseAuthorization();
 app.UseRequestLocalization();
 app.MapControllers();
 
+//Execute seed date one time in this project
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

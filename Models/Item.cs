@@ -10,6 +10,7 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
+        // New Update on my Task
         [Required(
             ErrorMessageResourceName = "NameRequired",
             ErrorMessageResourceType = typeof(Messages))]

@@ -9,6 +9,7 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
+        // New Update on my Task
         [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameRequired")]
         [MaxLength(200, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameMaxLength")]
         [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CustomerNameEnglishOnly")]
