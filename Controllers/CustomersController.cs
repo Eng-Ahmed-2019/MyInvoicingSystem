@@ -1,11 +1,9 @@
-﻿using InvoicingSystem.Data;
-using InvoicingSystem.DTOs;
-using InvoicingSystem.Models;
+﻿using InvoicingSystem.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 using InvoicingSystem.Localization;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Authorization;
+using InvoicingSystem.Services.Interfaces;
 
 namespace InvoicingSystem.Controllers
 {
@@ -14,12 +12,12 @@ namespace InvoicingSystem.Controllers
     [Route("api/[controller]")]
     public class CustomersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICustomerService _customerService;
         private readonly IStringLocalizer<Messages> _localizer;
 
-        public CustomersController(ApplicationDbContext context, IStringLocalizer<Messages> localizer)
+        public CustomersController(ICustomerService customerService, IStringLocalizer<Messages> localizer)
         {
-            _context = context;
+            _customerService = customerService;
             _localizer = localizer;
         }
 
@@ -44,19 +42,7 @@ namespace InvoicingSystem.Controllers
             if (!TryGetCompanyId(out var companyId, out var errorResult))
                 return errorResult!;
 
-            var customers = await _context.Customers
-                .Where(c => c.CompanyId == companyId)
-                .OrderByDescending(c => c.CreatedAt)
-                .Select(c => new CustomerReadDto
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    NameAr = c.NameAr,
-                    Email = c.Email,
-                    Phone = c.Phone,
-                })
-                .ToListAsync();
-
+            var customers = await _customerService.GetCustomersAsync(companyId);
             return Ok(customers);
         }
 
@@ -70,37 +56,11 @@ namespace InvoicingSystem.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _context.Customers.AnyAsync(c => c.CompanyId == companyId &&
-                ((dto.Email != null && c.Email == dto.Email) ||
-                 (dto.Phone != null && c.Phone == dto.Phone))))
-            {
+            var created = await _customerService.CreateCustomerAsync(companyId, dto);
+            if (created == null)
                 return Conflict(new { message = _localizer["CustomerExists"] });
-            }
 
-            var customer = new Customer
-            {
-                Id = Guid.NewGuid(),
-                Name = dto.Name,
-                NameAr = dto.NameAr,
-                Email = dto.Email,
-                Phone = dto.Phone,
-                CompanyId = companyId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-
-            var readDto = new CustomerReadDto
-            {
-                Id = customer.Id,
-                Name = customer.Name,
-                NameAr = customer.NameAr,
-                Email = customer.Email,
-                Phone = customer.Phone,
-            };
-
-            return CreatedAtAction(nameof(GetCustomers), new { id = customer.Id }, readDto);
+            return CreatedAtAction(nameof(GetCustomers), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
@@ -110,30 +70,16 @@ namespace InvoicingSystem.Controllers
             if (!TryGetCompanyId(out var companyId, out var errorResult))
                 return errorResult!;
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.Id == id && c.CompanyId == companyId);
-
-            if (customer == null)
-                return NotFound(new { message = _localizer["CustomerNotFound"] });
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _context.Customers.AnyAsync(c => c.CompanyId == companyId &&
-                c.Id != id &&
-                ((dto.Email != null && c.Email == dto.Email) ||
-                 (dto.Phone != null && c.Phone == dto.Phone))))
-            {
+            var result = await _customerService.EditCustomerAsync(companyId, id, dto);
+
+            if (result == CustomerUpdateStatus.NotFound)
+                return NotFound(new { message = _localizer["CustomerNotFound"] });
+
+            if (result == CustomerUpdateStatus.Conflict)
                 return Conflict(new { message = _localizer["CustomerExists"] });
-            }
-
-            customer.Name = dto.Name;
-            customer.NameAr = dto.NameAr;
-            customer.Email = dto.Email;
-            customer.Phone = dto.Phone;
-            customer.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
@@ -145,14 +91,9 @@ namespace InvoicingSystem.Controllers
             if (!TryGetCompanyId(out var companyId, out var errorResult))
                 return errorResult!;
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(c => c.Id == id && c.CompanyId == companyId);
-
-            if (customer == null)
+            var deleted = await _customerService.DeleteCustomerAsync(companyId, id);
+            if (!deleted)
                 return NotFound(new { message = _localizer["CustomerNotFound"] });
-
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

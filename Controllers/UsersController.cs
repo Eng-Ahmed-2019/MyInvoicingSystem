@@ -1,12 +1,9 @@
-﻿using InvoicingSystem.Data;
-using InvoicingSystem.DTOs;
-using InvoicingSystem.Models;
-using InvoicingSystem.Services;
+﻿using InvoicingSystem.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 using InvoicingSystem.Localization;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Authorization;
+using InvoicingSystem.Services.Interfaces;
 
 namespace InvoicingSystem.Controllers
 {
@@ -15,12 +12,12 @@ namespace InvoicingSystem.Controllers
     [Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserService _userService;
         private readonly IStringLocalizer<Messages> _localizer;
 
-        public UsersController(ApplicationDbContext context, IStringLocalizer<Messages> localizer)
+        public UsersController(IUserService userService, IStringLocalizer<Messages> localizer)
         {
-            _context = context;
+            _userService = userService;
             _localizer = localizer;
         }
 
@@ -54,22 +51,9 @@ namespace InvoicingSystem.Controllers
         public async Task<ActionResult<IEnumerable<UserReadDto>>> GetUsers()
         {
             var (isValid, companyId) = GetCompanyId();
-            if (!isValid) return BadRequest("Company ID is missing or invalid.");
+            if (!isValid) return BadRequest(_localizer["CompanyIdMissing"] ?? "Company ID is missing or invalid.");
 
-            var users = await _context.Users
-                .Where(u => u.CompanyId == companyId)
-                .Include(u => u.Role)
-                .Select(u => new UserReadDto
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Email = u.Email,
-                    FullName = u.FullName,
-                    FullNameAr = u.FullNameAr,
-                    RoleName = u.Role!.NameEn,
-                })
-                .ToListAsync();
-
+            var users = await _userService.GetUsersAsync(companyId);
             return Ok(users);
         }
 
@@ -78,24 +62,11 @@ namespace InvoicingSystem.Controllers
         public async Task<ActionResult<UserReadDto>> GetUserById(Guid id)
         {
             var (isValid, companyId) = GetCompanyId();
-            if (!isValid) return BadRequest("Company ID is missing or invalid.");
+            if (!isValid) return BadRequest(_localizer["CompanyIdMissing"] ?? "Company ID is missing or invalid.");
 
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .Where(u => u.Id == id && u.CompanyId == companyId)
-                .Select(u => new UserReadDto
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Email = u.Email,
-                    FullName = u.FullName,
-                    FullNameAr = u.FullNameAr,
-                    RoleName = u.Role!.NameEn,
-                })
-                .FirstOrDefaultAsync();
-
+            var user = await _userService.GetUserByIdAsync(companyId, id);
             if (user == null)
-                return NotFound("User not found or does not belong to your company.");
+                return NotFound(_localizer["UserNotFound"] ?? "User not found or does not belong to your company.");
 
             return Ok(user);
         }
@@ -105,45 +76,16 @@ namespace InvoicingSystem.Controllers
         public async Task<ActionResult<UserReadDto>> CreateUser(UserCreateDto dto)
         {
             var (isValid, companyId) = GetCompanyId();
-            if (!isValid) return BadRequest("Company ID is missing or invalid.");
+            if (!isValid) return BadRequest(_localizer["CompanyIdMissing"] ?? "Company ID is missing or invalid.");
 
-            if (await _context.Users.AnyAsync(u => u.CompanyId == companyId &&
-                                                  (u.Email == dto.Email || u.Username == dto.Username)))
-            {
-                return Conflict("A user with the same email or username already exists in this company.");
-            }
+            if (await Task.FromResult(!ModelState.IsValid))
+                return BadRequest(ModelState);
 
-            var hashedPassword = PasswordHasher.HashPassword(dto.Password);
+            var created = await _userService.CreateUserAsync(companyId, dto);
+            if (created == null)
+                return Conflict(_localizer["UserExists"] ?? "A user with the same email or username already exists in this company.");
 
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = dto.Username,
-                Email = dto.Email,
-                PasswordHash = hashedPassword,
-                FullName = dto.FullName,
-                FullNameAr = dto.FullNameAr,
-                CompanyId = companyId,
-                RoleId = dto.RoleId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var role = await _context.Roles.FindAsync(dto.RoleId);
-
-            var readDto = new UserReadDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                FullName = user.FullName,
-                FullNameAr = user.FullNameAr,
-                RoleName = role?.NameEn ?? "",
-            };
-
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, readDto);
+            return CreatedAtAction(nameof(GetUserById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
@@ -151,36 +93,18 @@ namespace InvoicingSystem.Controllers
         public async Task<IActionResult> UpdateUser(Guid id, UserUpdateDto dto)
         {
             var (isValid, companyId) = GetCompanyId();
-            if (!isValid) return BadRequest("Company ID is missing or invalid.");
+            if (!isValid) return BadRequest(_localizer["CompanyIdMissing"] ?? "Company ID is missing or invalid.");
 
-            var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == id && u.CompanyId == companyId);
+            if (await Task.FromResult(!ModelState.IsValid))
+                return BadRequest(ModelState);
 
-            if (existingUser == null)
-                return NotFound("User not found or does not belong to your company.");
+            var (success, conflict) = await _userService.UpdateUserAsync(companyId, id, dto);
 
-            if ((existingUser.Email != dto.Email || existingUser.Username != dto.Username) &&
-                await _context.Users.AnyAsync(u => u.CompanyId == companyId &&
-                                                  (u.Email == dto.Email || u.Username == dto.Username) &&
-                                                  u.Id != id))
-            {
-                return Conflict("Another user with the same email or username already exists.");
-            }
+            if (!success && !conflict)
+                return NotFound(_localizer["UserNotFound"] ?? "User not found or does not belong to your company.");
 
-            existingUser.FullName = dto.FullName;
-            existingUser.FullNameAr = dto.FullNameAr;
-            existingUser.Email = dto.Email;
-            existingUser.Username = dto.Username;
-            existingUser.RoleId = dto.RoleId;
-
-            if (!string.IsNullOrWhiteSpace(dto.Password))
-            {
-                existingUser.PasswordHash = PasswordHasher.HashPassword(dto.Password);
-            }
-
-            existingUser.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
+            if (conflict)
+                return Conflict(_localizer["UserConflict"] ?? "Another user with the same email or username already exists.");
 
             return NoContent();
         }
@@ -190,16 +114,11 @@ namespace InvoicingSystem.Controllers
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var (isValid, companyId) = GetCompanyId();
-            if (!isValid) return BadRequest("Company ID is missing or invalid.");
+            if (!isValid) return BadRequest(_localizer["CompanyIdMissing"] ?? "Company ID is missing or invalid.");
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == id && u.CompanyId == companyId);
-
-            if (user == null)
-                return NotFound("User not found or does not belong to your company.");
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            var deleted = await _userService.DeleteUserAsync(companyId, id);
+            if (!deleted)
+                return NotFound(_localizer["UserNotFound"] ?? "User not found or does not belong to your company.");
 
             return NoContent();
         }

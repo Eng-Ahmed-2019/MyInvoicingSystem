@@ -20,6 +20,7 @@ namespace InvoicingSystem.DTOs
 
     public class InvoiceCreateDto
     {
+        public Guid CustomerId { get; set; }
         [Required]
         public string InvoiceNumber { get; set; } = string.Empty;
         [Required]
@@ -29,10 +30,8 @@ namespace InvoicingSystem.DTOs
         public string? Description { get; set; }
         public string? DescriptionAr { get; set; }
         public decimal? Tax { get; set; }
-        /*
         [Required]
         public List<InvoiceItemDto> Items { get; set; } = new();
-        */
     }
 
     public class InvoiceReadDto

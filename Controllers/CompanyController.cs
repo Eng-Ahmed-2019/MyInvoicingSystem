@@ -1,11 +1,9 @@
-﻿using InvoicingSystem.Data;
-using InvoicingSystem.DTOs;
-using InvoicingSystem.Models;
+﻿using InvoicingSystem.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 using InvoicingSystem.Localization;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Authorization;
+using InvoicingSystem.Services.Interfaces;
 
 namespace InvoicingSystem.Controllers
 {
@@ -14,12 +12,12 @@ namespace InvoicingSystem.Controllers
     [Authorize]
     public class CompanyController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ICompanyService _companyService;
         private readonly IStringLocalizer<Messages> _localizer;
 
-        public CompanyController(ApplicationDbContext context, IStringLocalizer<Messages> localizer)
+        public CompanyController(ICompanyService companyService, IStringLocalizer<Messages> localizer)
         {
-            _context = context;
+            _companyService = companyService;
             _localizer = localizer;
         }
 
@@ -33,41 +31,21 @@ namespace InvoicingSystem.Controllers
                 return BadRequest(new { message = _localizer["InvalidCompanyId"] });
             }
 
-            var company = await _context.Companies
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == companyId);
+            var company = await _companyService.GetMyCompanyAsync(companyId);
 
             if (company == null)
             {
                 return NotFound(new { message = _localizer["CompanyNotFound"] });
             }
 
-            var dto = new CompanyReadDto
-            {
-                Name = company.Name,
-                NameAr = company.NameAr,
-                Description = company.Description,
-                DescriptionAr = company.DescriptionAr,
-            };
-
-            return Ok(dto);
+            return Ok(company);
         }
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCompanyById(Guid id)
         {
-            var companyDto = await _context.Companies
-                .Where(c => c.Id == id)
-                .Select(c => new CompantDTO
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    NameAr = c.NameAr,
-                    Description = c.Description!,
-                    DescriptionAr = c.DescriptionAr!
-                })
-                .FirstOrDefaultAsync();
+            var companyDto = await _companyService.GetCompanyByIdAsync(id);
 
             if (companyDto == null)
             {
@@ -83,34 +61,11 @@ namespace InvoicingSystem.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _context.Companies.AnyAsync(c => c.Name == dto.Name || c.NameAr == dto.NameAr))
-            {
-                return Conflict(new { message = "Company with the same name already exists." });
-            }
+            var result = await _companyService.CreateCompanyAsync(dto);
+            if (result == null)
+                return Conflict(new { message = _localizer["CompanyAlreadyExists"] ?? "Company with the same name already exists." });
 
-            var company = new Company
-            {
-                Id = Guid.NewGuid(),
-                Name = dto.Name,
-                NameAr = dto.NameAr,
-                Description = dto.Description,
-                DescriptionAr = dto.DescriptionAr,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Companies.Add(company);
-            await _context.SaveChangesAsync();
-
-            var resultDto = new CompanyResultDto
-            {
-                Id = company.Id,
-                Name = company.Name,
-                NameAr = company.NameAr,
-                Description = company.Description!,
-                DescriptionAr = company.DescriptionAr!
-            };
-
-            return CreatedAtAction(nameof(GetCompanyById), new { id = company.Id }, resultDto);
+            return CreatedAtAction(nameof(GetCompanyById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
@@ -120,42 +75,20 @@ namespace InvoicingSystem.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var company = await _context.Companies.FindAsync(id);
-            if (company == null)
+            var result = await _companyService.UpdateCompanyAsync(id, dto);
+            if (result == null)
                 return NotFound(new { message = _localizer["CompanyNotFound"] });
 
-            company.Name = dto.Name;
-            company.NameAr = dto.NameAr;
-            company.Description = dto.Description;
-            company.DescriptionAr = dto.DescriptionAr;
-            company.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-
-            var resultDto = new CompanyResultDto
-            {
-                Id = company.Id,
-                Name = company.Name,
-                NameAr = company.NameAr,
-                Description = company.Description!,
-                DescriptionAr = company.DescriptionAr!
-            };
-
-            return Ok(resultDto);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCompany(Guid id)
         {
-            var company = await _context.Companies.FindAsync(id);
-            if (company == null)
-            {
+            var deleted = await _companyService.DeleteCompanyAsync(id);
+            if (!deleted)
                 return NotFound(new { message = _localizer["CompanyNotFound"] });
-            }
-
-            _context.Companies.Remove(company);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

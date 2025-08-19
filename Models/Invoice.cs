@@ -1,7 +1,6 @@
 ﻿using InvoicingSystem.Localization;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Resources;
 
 namespace InvoicingSystem.Models
 {
@@ -17,7 +16,7 @@ namespace InvoicingSystem.Models
         )]
         [StringLength(50)]
         public string InvoiceNumber { get; set; } = string.Empty;
-
+        
         [Required(
             ErrorMessageResourceType = typeof(Messages),
             ErrorMessageResourceName = "Title_Required"

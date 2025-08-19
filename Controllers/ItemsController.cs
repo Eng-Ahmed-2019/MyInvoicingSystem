@@ -1,11 +1,9 @@
-﻿using InvoicingSystem.Data;
-using InvoicingSystem.DTOs;
-using InvoicingSystem.Models;
+﻿using InvoicingSystem.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using InvoicingSystem.Localization;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Authorization;
+using InvoicingSystem.Services.Interfaces;
 
 namespace InvoicingSystem.Controllers
 {
@@ -14,12 +12,12 @@ namespace InvoicingSystem.Controllers
     [Route("api/[controller]")]
     public class ItemsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IItemService _itemService;
         private readonly IStringLocalizer<Messages> _localizer;
 
-        public ItemsController(ApplicationDbContext context, IStringLocalizer<Messages> localizer)
+        public ItemsController(IItemService itemService, IStringLocalizer<Messages> localizer)
         {
-            _context = context;
+            _itemService = itemService;
             _localizer = localizer;
         }
 
@@ -44,19 +42,7 @@ namespace InvoicingSystem.Controllers
             if (!TryGetCompanyId(out var companyId, out var errorResult))
                 return errorResult!;
 
-            var items = await _context.Items
-                .Where(i => i.CompanyId == companyId)
-                .Select(i => new ItemReadDto
-                {
-                    Id = i.Id,
-                    Name = i.Name,
-                    NameAr = i.NameAr,
-                    Description = i.Description,
-                    DescriptionAr = i.DescriptionAr,
-                    UnitPrice = i.UnitPrice
-                })
-                .ToListAsync();
-
+            var items = await _itemService.GetItemsAsync(companyId);
             return Ok(items);
         }
 
@@ -70,37 +56,11 @@ namespace InvoicingSystem.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _context.Items.AnyAsync(i => i.CompanyId == companyId &&
-                (i.Name == dto.Name || i.NameAr == dto.NameAr)))
-            {
-                return Conflict("An item with the same name already exists.");
-            }
+            var created = await _itemService.CreateItemAsync(companyId, dto);
+            if (created == null)
+                return Conflict(new { message = _localizer["ItemExists"] ?? "An item with the same name already exists." });
 
-            var item = new Item
-            {
-                Id = Guid.NewGuid(),
-                Name = dto.Name,
-                NameAr = dto.NameAr,
-                Description = dto.Description,
-                DescriptionAr = dto.DescriptionAr,
-                UnitPrice = dto.UnitPrice,
-                CompanyId = companyId
-            };
-
-            _context.Items.Add(item);
-            await _context.SaveChangesAsync();
-
-            var readDto = new ItemReadDto
-            {
-                Id = item.Id,
-                Name = item.Name,
-                NameAr = item.NameAr,
-                Description = item.Description,
-                DescriptionAr = item.DescriptionAr,
-                UnitPrice = item.UnitPrice
-            };
-
-            return CreatedAtAction(nameof(GetItems), new { id = item.Id }, readDto);
+            return CreatedAtAction(nameof(GetItems), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
@@ -110,29 +70,16 @@ namespace InvoicingSystem.Controllers
             if (!TryGetCompanyId(out var companyId, out var errorResult))
                 return errorResult!;
 
-            var item = await _context.Items
-                .FirstOrDefaultAsync(i => i.Id == id && i.CompanyId == companyId);
-
-            if (item == null)
-                return NotFound("Item not found for your company.");
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (await _context.Items.AnyAsync(i => i.CompanyId == companyId &&
-                i.Id != id &&
-                (i.Name == dto.Name || i.NameAr == dto.NameAr)))
-            {
-                return Conflict("Another item with the same name already exists.");
-            }
+            var result = await _itemService.UpdateItemAsync(companyId, id, dto);
 
-            item.Name = dto.Name;
-            item.NameAr = dto.NameAr;
-            item.Description = dto.Description;
-            item.DescriptionAr = dto.DescriptionAr;
-            item.UnitPrice = dto.UnitPrice;
+            if (result == ItemUpdateStatus.NotFound)
+                return NotFound(new { message = _localizer["ItemNotFound"] ?? "Item not found for your company." });
 
-            await _context.SaveChangesAsync();
+            if (result == ItemUpdateStatus.Conflict)
+                return Conflict(new { message = _localizer["AnotherItemExists"] ?? "Another item with the same name already exists." });
 
             return NoContent();
         }
@@ -144,14 +91,9 @@ namespace InvoicingSystem.Controllers
             if (!TryGetCompanyId(out var companyId, out var errorResult))
                 return errorResult!;
 
-            var item = await _context.Items
-                .FirstOrDefaultAsync(i => i.Id == id && i.CompanyId == companyId);
-
-            if (item == null)
-                return NotFound("Item not found for your company.");
-
-            _context.Items.Remove(item);
-            await _context.SaveChangesAsync();
+            var deleted = await _itemService.DeleteItemAsync(companyId, id);
+            if (!deleted)
+                return NotFound(new { message = _localizer["ItemNotFound"] ?? "Item not found for your company." });
 
             return NoContent();
         }
