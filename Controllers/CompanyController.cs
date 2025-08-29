@@ -4,6 +4,7 @@ using InvoicingSystem.Localization;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Authorization;
 using InvoicingSystem.Services.Interfaces;
+using InvoicingSystem.Services;
 
 namespace InvoicingSystem.Controllers
 {
@@ -14,83 +15,135 @@ namespace InvoicingSystem.Controllers
     {
         private readonly ICompanyService _companyService;
         private readonly IStringLocalizer<Messages> _localizer;
+        private readonly FileLoggerService _fileLoggerService;
 
-        public CompanyController(ICompanyService companyService, IStringLocalizer<Messages> localizer)
+        public CompanyController(ICompanyService companyService, IStringLocalizer<Messages> localizer, FileLoggerService fileLoggerService)
         {
             _companyService = companyService;
             _localizer = localizer;
+            _fileLoggerService = fileLoggerService;
         }
 
         [HttpGet("my")]
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> GetMyCompany()
         {
-            var companyIdObj = HttpContext.Items["CompanyId"];
-            if (companyIdObj == null || !Guid.TryParse(companyIdObj.ToString(), out var companyId))
+            _fileLoggerService.Log("GetMyCompany endpoint called.");
+
+            try
             {
-                return BadRequest(new { message = _localizer["InvalidCompanyId"] });
+                var companyIdObj = HttpContext.Items["CompanyId"];
+                if (companyIdObj == null || !Guid.TryParse(companyIdObj.ToString(), out var companyId))
+                {
+                    return BadRequest(new { message = _localizer["InvalidCompanyId"] });
+                }
+
+                var company = await _companyService.GetMyCompanyAsync(companyId);
+
+                if (company == null)
+                {
+                    return NotFound(new { message = _localizer["CompanyNotFound"] });
+                }
+
+                return Ok(company);
             }
-
-            var company = await _companyService.GetMyCompanyAsync(companyId);
-
-            if (company == null)
+            catch(Exception ex)
             {
-                return NotFound(new { message = _localizer["CompanyNotFound"] });
+                _fileLoggerService.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
             }
-
-            return Ok(company);
         }
 
         [HttpGet("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetCompanyById(Guid id)
         {
-            var companyDto = await _companyService.GetCompanyByIdAsync(id);
+            _fileLoggerService.Log($"GetCompanyById endpoint called with id: {id}");
 
-            if (companyDto == null)
+            try
             {
-                return NotFound(new { message = _localizer["CompanyNotFound"] });
+                var companyDto = await _companyService.GetCompanyByIdAsync(id);
+
+                if (companyDto == null)
+                {
+                    return NotFound(new { message = _localizer["CompanyNotFound"] });
+                }
+                return Ok(companyDto);
             }
-            return Ok(companyDto);
+            catch (Exception ex)
+            {
+                _fileLoggerService.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCompany([FromBody] CompanyCreateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            _fileLoggerService.Log("CreateCompany endpoint called.");
 
-            var result = await _companyService.CreateCompanyAsync(dto);
-            if (result == null)
-                return Conflict(new { message = _localizer["CompanyAlreadyExists"] ?? "Company with the same name already exists." });
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(GetCompanyById), new { id = result.Id }, result);
+                var result = await _companyService.CreateCompanyAsync(dto);
+                if (result == null)
+                    return Conflict(new { message = _localizer["CompanyAlreadyExists"] });
+
+                return CreatedAtAction(nameof(GetCompanyById), new { id = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                _fileLoggerService.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCompany(Guid id, [FromBody] CompanyUpdateDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            _fileLoggerService.Log($"UpdateCompany endpoint called with id: {id}");
 
-            var result = await _companyService.UpdateCompanyAsync(id, dto);
-            if (result == null)
-                return NotFound(new { message = _localizer["CompanyNotFound"] });
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            return Ok(result);
+                var result = await _companyService.UpdateCompanyAsync(id, dto);
+                if (result == null)
+                    return NotFound(new { message = _localizer["CompanyNotFound"] });
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _fileLoggerService.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCompany(Guid id)
         {
-            var deleted = await _companyService.DeleteCompanyAsync(id);
-            if (!deleted)
-                return NotFound(new { message = _localizer["CompanyNotFound"] });
+            _fileLoggerService.Log($"DeleteCompany endpoint called with id: {id}");
 
-            return NoContent();
+            try
+            {
+                var deleted = await _companyService.DeleteCompanyAsync(id);
+                if (!deleted)
+                    return NotFound(new { message = _localizer["CompanyNotFound"] });
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _fileLoggerService.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
     }
 }

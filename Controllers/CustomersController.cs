@@ -4,6 +4,7 @@ using InvoicingSystem.Localization;
 using Microsoft.Extensions.Localization;
 using Microsoft.AspNetCore.Authorization;
 using InvoicingSystem.Services.Interfaces;
+using InvoicingSystem.Services;
 
 namespace InvoicingSystem.Controllers
 {
@@ -14,88 +15,142 @@ namespace InvoicingSystem.Controllers
     {
         private readonly ICustomerService _customerService;
         private readonly IStringLocalizer<Messages> _localizer;
+        private readonly FileLoggerService _fileLogger;
 
-        public CustomersController(ICustomerService customerService, IStringLocalizer<Messages> localizer)
+        public CustomersController(ICustomerService customerService, IStringLocalizer<Messages> localizer, FileLoggerService fileLoggerService)
         {
             _customerService = customerService;
             _localizer = localizer;
+            _fileLogger = fileLoggerService;
         }
 
         private bool TryGetCompanyId(out Guid companyId, out ActionResult? errorResult)
         {
-            companyId = Guid.Empty;
-            errorResult = null;
+            _fileLogger.Log("Extracting CompanyId from HttpContext.Items");
 
-            var companyIdObj = HttpContext.Items["CompanyId"];
-            if (companyIdObj == null || !Guid.TryParse(companyIdObj.ToString(), out companyId))
+            try
             {
-                errorResult = BadRequest(new { message = _localizer["InvalidCompanyId"] });
+                companyId = Guid.Empty;
+                errorResult = null;
+
+                var companyIdObj = HttpContext.Items["CompanyId"];
+                if (companyIdObj == null || !Guid.TryParse(companyIdObj.ToString(), out companyId))
+                {
+                    errorResult = BadRequest(new { message = _localizer["InvalidCompanyId"] });
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError(ex);
+                companyId = Guid.Empty;
+                errorResult = StatusCode(500, new { message = _localizer["ServerError"] });
                 return false;
             }
-            return true;
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult<IEnumerable<CustomerReadDto>>> GetCustomers()
         {
-            if (!TryGetCompanyId(out var companyId, out var errorResult))
-                return errorResult!;
+            _fileLogger.Log("GetCustomers endpoint called");
 
-            var customers = await _customerService.GetCustomersAsync(companyId);
-            return Ok(customers);
+            try
+            {
+                if (!TryGetCompanyId(out var companyId, out var errorResult))
+                    return errorResult!;
+
+                var customers = await _customerService.GetCustomersAsync(companyId);
+                return Ok(customers);
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult<CustomerReadDto>> CreateCustomer(CustomerCreateDto dto)
         {
-            if (!TryGetCompanyId(out var companyId, out var errorResult))
-                return errorResult!;
+            _fileLogger.Log("CreateCustomer endpoint called");
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!TryGetCompanyId(out var companyId, out var errorResult))
+                    return errorResult!;
 
-            var created = await _customerService.CreateCustomerAsync(companyId, dto);
-            if (created == null)
-                return Conflict(new { message = _localizer["CustomerExists"] });
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(GetCustomers), new { id = created.Id }, created);
+                var created = await _customerService.CreateCustomerAsync(companyId, dto);
+                if (created == null)
+                    return Conflict(new { message = _localizer["CustomerExists"] });
+
+                return CreatedAtAction(nameof(GetCustomers), new { id = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> Edit(Guid id, CustomerUpdateDto dto)
         {
-            if (!TryGetCompanyId(out var companyId, out var errorResult))
-                return errorResult!;
+            _fileLogger.Log("EditCustomer endpoint called");
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!TryGetCompanyId(out var companyId, out var errorResult))
+                    return errorResult!;
 
-            var result = await _customerService.EditCustomerAsync(companyId, id, dto);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            if (result == CustomerUpdateStatus.NotFound)
-                return NotFound(new { message = _localizer["CustomerNotFound"] });
+                var result = await _customerService.EditCustomerAsync(companyId, id, dto);
 
-            if (result == CustomerUpdateStatus.Conflict)
-                return Conflict(new { message = _localizer["CustomerExists"] });
+                if (result == CustomerUpdateStatus.NotFound)
+                    return NotFound(new { message = _localizer["CustomerNotFound"] });
 
-            return NoContent();
+                if (result == CustomerUpdateStatus.Conflict)
+                    return Conflict(new { message = _localizer["CustomerExists"] });
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
-            if (!TryGetCompanyId(out var companyId, out var errorResult))
-                return errorResult!;
+            _fileLogger.Log("DeleteCustomer endpoint called");
 
-            var deleted = await _customerService.DeleteCustomerAsync(companyId, id);
-            if (!deleted)
-                return NotFound(new { message = _localizer["CustomerNotFound"] });
+            try
+            {
+                if (!TryGetCompanyId(out var companyId, out var errorResult))
+                    return errorResult!;
 
-            return NoContent();
+                var deleted = await _customerService.DeleteCustomerAsync(companyId, id);
+                if (!deleted)
+                    return NotFound(new { message = _localizer["CustomerNotFound"] });
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _fileLogger.LogError(ex);
+                return StatusCode(500, new { message = _localizer["ServerError"] });
+            }
         }
     }
 }
