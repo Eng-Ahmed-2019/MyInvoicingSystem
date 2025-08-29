@@ -8,18 +8,16 @@ namespace InvoicingSystem.Models
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value == null)
-            {
                 return ValidationResult.Success;
-            }
 
             var input = value.ToString();
             var regex = new Regex(@"^[\u0600-\u06FF\s]+$");
 
-            if (!regex.IsMatch(input!))
+            if (regex.IsMatch(input!))
             {
-                return new ValidationResult("هذا الحقل يجب أن يحتوي على حروف عربية فقط.");
+                return ValidationResult.Success;
             }
-            return ValidationResult.Success;
+            return new ValidationResult(ErrorMessageString);
         }
     }
 }

@@ -37,14 +37,17 @@ namespace InvoicingSystem.Services.Implementations
             };
         }
 
-        public async Task<CompantDTO?> GetCompanyByIdAsync(Guid id)
+        public async Task<CompantDTO?> GetCompanyByIdAndNameAsync(Guid id, string name)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Company ID is invalid.");
 
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Company name is invalid.");
+
             var company = await _context.Companies
                 .AsNoTracking()
-                .Where(c => c.Id == id)
+                .Where(c => c.Id == id && (c.Name == name || c.NameAr == name))
                 .Select(c => new CompantDTO
                 {
                     Id = c.Id,
@@ -56,7 +59,7 @@ namespace InvoicingSystem.Services.Implementations
                 .FirstOrDefaultAsync();
 
             if (company == null)
-                throw new KeyNotFoundException($"Company with ID {id} was not found.");
+                throw new KeyNotFoundException($"Company with ID {id} and Name '{name}' was not found.");
 
             return company;
         }

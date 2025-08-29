@@ -54,15 +54,15 @@ namespace InvoicingSystem.Controllers
             }
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}/{name}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetCompanyById(Guid id)
+        public async Task<IActionResult> GetCompanyByIdAndName(Guid id, string name)
         {
-            _fileLoggerService.Log($"GetCompanyById endpoint called with id: {id}");
+            _fileLoggerService.Log($"GetCompanyByIdAndName endpoint called with id: {id}, name: {name}");
 
             try
             {
-                var companyDto = await _companyService.GetCompanyByIdAsync(id);
+                var companyDto = await _companyService.GetCompanyByIdAndNameAsync(id, name);
 
                 if (companyDto == null)
                 {
@@ -92,7 +92,7 @@ namespace InvoicingSystem.Controllers
                 if (result == null)
                     return Conflict(new { message = _localizer["CompanyAlreadyExists"] });
 
-                return CreatedAtAction(nameof(GetCompanyById), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetCompanyByIdAndName), new { id = result.Id, name = result.Name }, result);
             }
             catch (Exception ex)
             {

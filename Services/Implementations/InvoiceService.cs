@@ -60,11 +60,11 @@ namespace InvoicingSystem.Services.Implementations
             };
         }
 
-        public async Task<InvoiceItemsCreateStatus> CreateInvoiceItemsAsync(string invoiceNumber, List<InvoiceItemCreateDto> itemsDto)
+        public async Task<InvoiceItemsCreateStatus> CreateInvoiceItemsAsync(Guid id, List<InvoiceItemCreateDto> itemsDto)
         {
             var invoice = await _context.Invoices
                 .Include(i => i.InvoiceItems)
-                .FirstOrDefaultAsync(i => i.InvoiceNumber == invoiceNumber);
+                .FirstOrDefaultAsync(i => i.Id == id);
 
             if (invoice == null)
                 return InvoiceItemsCreateStatus.InvoiceNotFound;

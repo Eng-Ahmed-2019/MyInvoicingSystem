@@ -81,7 +81,7 @@ namespace InvoicingSystem.Controllers
 
         [HttpPost("{invoiceId}/items")]
         [Authorize(Policy = "CreateInvoiceItems")]
-        public async Task<ActionResult> CreateInvoiceItems(string invoiceNumber, List<InvoiceItemCreateDto> itemsDto)
+        public async Task<ActionResult> CreateInvoiceItems(Guid id, List<InvoiceItemCreateDto> itemsDto)
         {
             _fileLoggerService.Log("CreateInvoiceItems endpoint called");
 
@@ -90,7 +90,7 @@ namespace InvoicingSystem.Controllers
                 if (itemsDto == null || !itemsDto.Any())
                     return BadRequest(new { message = _localizer["InvalidRequest"] });
 
-                var status = await _invoiceService.CreateInvoiceItemsAsync(invoiceNumber, itemsDto);
+                var status = await _invoiceService.CreateInvoiceItemsAsync(id, itemsDto);
 
                 if (status == InvoiceItemsCreateStatus.InvoiceNotFound)
                     return NotFound(new { message = _localizer["InvoiceNotFound"] });

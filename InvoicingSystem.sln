@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoicingSystem", "InvoicingSystem.csproj", "{3976C272-D72C-46DA-8F0A-50C3C486009C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InvoicingSystem.Tests", "F:\Downloads\Documents\Programming\6- Projects\10- API Only\InvoicingSystem.Tests\InvoicingSystem.Tests.csproj", "{A55F8101-5A1A-49A4-B69D-023ECC688F97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{3976C272-D72C-46DA-8F0A-50C3C486009C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3976C272-D72C-46DA-8F0A-50C3C486009C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3976C272-D72C-46DA-8F0A-50C3C486009C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A55F8101-5A1A-49A4-B69D-023ECC688F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A55F8101-5A1A-49A4-B69D-023ECC688F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A55F8101-5A1A-49A4-B69D-023ECC688F97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A55F8101-5A1A-49A4-B69D-023ECC688F97}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

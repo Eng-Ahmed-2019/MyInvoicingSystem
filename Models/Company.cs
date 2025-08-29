@@ -8,7 +8,6 @@ namespace InvoicingSystem.Models
         [Key]
         public Guid Id { get; set; }
 
-        // New Update on my Task
         [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameRequired")]
         [MaxLength(150, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameMaxLength")]
         [MinLength(2, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = "CompanyNameMinLength")]
